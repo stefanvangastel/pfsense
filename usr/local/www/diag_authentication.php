@@ -43,11 +43,22 @@ require("guiconfig.inc");
 require_once("PEAR.inc");
 require_once("radius.inc");
 
-if ($_POST) {
-	$pconfig = $_POST;
-	unset($input_errors);
+if ($_POST || isset($_SERVER['REMOTE_USER'])) {
+	
+	if(isset($_SERVER['REMOTE_USER'])){
 
-	$authcfg = auth_get_authserver($_POST['authmode']);
+		$authcfg = auth_get_authserver($_POST['Webserver Authentication']);
+
+		$_POST['username'] = $_SERVER['REMOTE_USER'];
+		$_POST['password'] = uniqid(); //Fake
+
+	}else{
+		$pconfig = $_POST;
+		unset($input_errors);
+
+		$authcfg = auth_get_authserver($_POST['authmode']);
+	}
+		
 	if (!$authcfg)
 		$input_errors[] = $_POST['authmode'] . " " . gettext("is not a valid authentication server");
 

@@ -345,6 +345,20 @@ function local_backed($username, $passwd) {
 	return false;
 }
 
+function webserverauth_backed($username) {
+
+	$user = getUserEntry($username);
+	if (!$user) {
+		return false;
+	}
+
+	if (is_account_disabled($username) || is_account_expired($username)) {
+		return false;
+	}
+
+	return true;
+}
+
 function local_sync_accounts() {
 	global $debug, $config;
 	conf_mount_rw();
@@ -1387,6 +1401,9 @@ function auth_get_authserver($name) {
 			}
 		}
 	}
+	if ($name == "Webserver Authentication") {
+		return array("name" => gettext("Webserver Authentication"), "type" => "webserverauth");
+	}
 	if ($name == "Local Database") {
 		return array("name" => gettext("Local Database"), "type" => "Local Auth", "host" => $config['system']['hostname']);
 	}
@@ -1405,6 +1422,8 @@ function auth_get_authserver_list() {
 	}
 
 	$list["Local Database"] = array( "name" => gettext("Local Database"), "type" => "Local Auth", "host" => $config['system']['hostname']);
+	$list["Webserver Auth"] = array( "name" => gettext("Webserver Authentication"), "type" => "webserverauth");
+
 	return $list;
 }
 
@@ -1447,6 +1466,11 @@ function authenticate_user($username, $password, $authcfg = NULL, &$attributes =
 	switch ($authcfg['type']) {
 		case 'ldap':
 			if (ldap_backed($username, $password, $authcfg)) {
+				$authenticated = true;
+			}
+			break;
+		case 'webserverauth':
+			if (webserverauth_backed($username, $authcfg)) {
 				$authenticated = true;
 			}
 			break;
