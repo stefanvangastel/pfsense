@@ -1512,6 +1512,15 @@ function session_auth() {
 		return false;
 	}
 
+	/*TEST KERB*/
+	if(isset($_SERVER['REMOTE_USER'])){
+		//Fake $_POST data
+		$_POST['login'] = true;
+		$_POST['usernamefld'] = $_SERVER['REMOTE_USER'];
+		$_POST['passwordfld'] = uniqid();
+		$config['system']['webgui']['authmode'] = 'Webserver Authentication';
+	}
+
 	/* Validate incoming login request */
 	if (isset($_POST['login']) && !empty($_POST['usernamefld']) && !empty($_POST['passwordfld'])) {
 		$authcfg = auth_get_authserver($config['system']['webgui']['authmode']);
